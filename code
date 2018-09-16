@@ -1,0 +1,416 @@
+import pandas as pd
+import tkinter as tk 
+import tkinter as aa
+import tkinter as bb
+import tkinter as cc
+import pymysql
+import datetime
+from tkinter import messagebox as msgb
+
+
+
+root=tk.Tk()
+root.title("人員登入")
+root.geometry("480x310+650+300")
+
+
+comvalue=aa.StringVar()
+IName=tk.StringVar()
+IPassword=tk.StringVar()
+REIPassword=tk.StringVar()
+IPurview=tk.StringVar()
+MPa1=tk.StringVar()
+MainAccount=tk.StringVar()
+MainPasw=tk.StringVar()
+
+VL_name=aa.StringVar()
+VL_adress=aa.StringVar()
+VL_phone=aa.StringVar()
+VL_email=aa.StringVar()
+
+PL_name=aa.StringVar()
+PL_price=aa.StringVar()
+PL_dimension=aa.StringVar()
+OL_number=aa.StringVar()
+
+OL_Ydate=aa.StringVar()
+OL_Mdate=aa.StringVar()
+OL_Ddate=aa.StringVar()
+
+
+
+
+
+def login():
+    print("user_Name="+MainAccount.get())
+    print("passwd="+MainPasw.get())
+    x=MainAccount.get()
+    y=MainPasw.get()
+
+    conn= pymysql.connect('localhost','root','123456','try') 
+    sql_member = ("SELECT * FROM user_vip ")
+    cur=conn.cursor()
+    try:
+        cur.execute(sql_member) 
+        rs=cur.fetchall()
+        chkUser ="N"
+        for rslist in rs:
+            for idx,val in enumerate(rslist):
+                if(rslist[1] == x):
+                    if(rslist[2] == y):
+                        chkUser ="Y"
+                        break
+                    elif(rslist[2] != y ):
+                        chkUser ="W"
+                        break
+        if (chkUser=="Y"):
+            msgb.showinfo(title="登入中...",message="登入成功")
+            #root.destroy() 不能用會讓StringVar() 一起崩壞
+            home()
+        elif(chkUser=="W"):
+            msgb.showinfo(title="登入中...",message="帳號或密碼錯誤")
+        else:
+            msgb.showinfo(title="error", message="當前用戶不存在")
+
+    except Exception as yee:  
+        print (yee)  
+    cur.close()
+    conn.close()
+
+
+def showMsgF():
+    msgb.showinfo("帳號已註冊","請重新創建帳號")
+def showMsgT():
+    msgb.showinfo("帳號可使用","請繼續填寫")
+        
+def Check():
+    x=IName.get()
+    conn= pymysql.connect('localhost','root',"123456",'try')   
+    querySql ="SELECT user_Name FROM user_vip where user_Name = %s"
+    cur=conn.cursor()                                 
+    cur.execute(querySql, x) 
+    cnt =cur.rowcount
+    if (cnt !=0):
+        msgb.showinfo(title="帳號已註冊",message="帳號已註冊請重新註冊帳號")          
+        
+    else:
+        msgb.showinfo(title="帳號可使用",message="請繼續填寫")
+        
+    cur.close()
+    conn.close()
+    
+
+def submit():
+    #account
+    x=IName.get()
+    y=IPassword.get()
+
+
+    conn= pymysql.connect('localhost','root',"123456",'try')
+    querySql ="SELECT user_Name FROM user_vip where user_Name = %s"
+    insertSql ="INSERT INTO user_vip (user_Name,user_password,purview) VALUES (%s,%s,%s)"
+    cur=conn.cursor()                                 
+    cur.execute(querySql, x)
+    cnt =cur.rowcount
+    print (cnt)
+    if (cnt !=0):
+        msgb.showinfo(title="帳號已註冊",message="帳號已註冊請重新註冊帳號")
+    else:
+       cur.execute(insertSql, (x,y,"0")) 
+       insertCnt =cur.rowcount
+       print (insertCnt)
+       msgb.showinfo(title="成功創立",message="恭喜")
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def Reg(): 
+    Top1=tk.Toplevel()
+    Top1.geometry("480x310+650+300")
+    def hide_Reg():
+        Top1.withdraw()   
+    
+    LTitle=tk.Label(Top1,width=15,font=('Arial Black', 12),text="註 冊 新 會 員")
+    LTitle.place(x=130 ,y=10)
+
+    LName=tk.Label(Top1,width=8,text="使用者名稱:")
+    LName.place(x=5 ,y=70 )
+    LNameRAccount=tk.Entry(Top1,width=15,textvariable=IName)
+    LNameRAccount.place(x=70 ,y=70 )
+    
+    LName=tk.Label(Top1,width=8,text="登入密碼:")
+    LName.place(x=5 ,y=110 )
+    LNameRPasw=tk.Entry(Top1,width=15,textvariable=IPassword,show="*")
+    LNameRPasw.place(x=70 ,y=110 )
+    
+    LBday=tk.Label(Top1,width=8,text="確認密碼:")
+    LBday.place(x=5 ,y=150 )
+    LBdayRpasw=tk.Entry(Top1,width=15,textvariable=REIPassword,show="*")
+    LBdayRpasw.place(x=70 ,y=150 )
+    
+
+
+    btnCheck=tk.Button(Top1,width=7,font=('Arial Black', 8),text="檢查",command=Check)
+    btnCheck.place(x=185,y=65)
+    btnOK=tk.Button(Top1,width=9,font=('Arial Black', 11),text="提交",command=submit)
+    btnOK.place(x=300,y=170)
+    btnCancel=tk.Button(Top1,width=9,font=('Arial Black', 11),text="取消",command=hide_Reg)
+    btnCancel.place(x=300,y=230)
+    
+    Top1.mainloop()
+    
+
+    
+
+def home():
+    
+
+    Top2=bb.Toplevel()
+    Top2.title("首頁")
+    Top2.geometry("480x310+650+300")
+    Personnel=bb.Label(Top2,width=10,text="登入人員 :")
+    Personnel.place(x=0 ,y=10 )
+    Personne2=bb.Label(Top2,width=10,text=IName.get())
+    Personne2.place(x=75 ,y=10 )
+    
+    LTitle=bb.Label(Top2,width=15,font=('Arial Black', 20),text="尚 敏 會 計 系 統")
+    LTitle.place(x=85 ,y=10)
+    
+    btnCheck1=bb.Button(Top2,width=11,text="輸入資料",command=ReEnter)
+    btnCheck1.place(x=30,y=230)
+    btnOK1=bb.Button(Top2,width=11,text="查詢應收月份")
+    btnOK1.place(x=130,y=230)
+    btnCheck2=bb.Button(Top2,width=11,text="查詢數量",command=search)
+    btnCheck2.place(x=230,y=230)
+    
+    Top2.mainloop()
+    
+    
+def search():
+    conn= pymysql.connect('localhost','root',"123456",'try')
+     
+    sqlV="SELECT V_name FROM vendor"
+    
+    sqlP="SELECT P_price FROM product"
+
+    sqlO="SELECT O_number FROM order_form"
+    
+    df1 = pd.read_sql(sqlV,conn)
+    df2 = pd.read_sql(sqlP,conn)
+    df3 = pd.read_sql(sqlO,conn)
+
+    df = pd.DataFrame([["廠商","產品名稱","數量"], [df1,df2,df3]])
+    df.head()
+  #  df = pd.DataFrame([["廠商","產品名稱","數量"], [1,2,3]])
+    conn.close()
+    
+    
+    
+    
+    """
+    sqlV="SELECT V_name FROM vendor"
+    
+    sqlP="SELECT P_price FROM product"
+
+    sqlO="SELECT O_number FROM order_form"
+
+    aaa=cur.execute(sqlV)
+    print (aaa)
+    return
+    bbb=cur.execute(sqlP)
+    return
+    ccc=cur.execute(sqlO)
+    return
+
+    detail = [aaa,bbb,ccc]
+    select = pd.Series(detail)  
+    print(select)  
+    """
+    
+    
+    def change(event, row, col):
+        value = event.widget.get()
+        df.iloc[row,col] = value
+        print(df)  
+    Top4 = cc.Toplevel()
+    rows, cols = df.shape
+    for r in range(rows):
+        for c in range(cols):
+            e = tk.Entry(Top4)
+            e.insert(0, df.iloc[r,c])
+            e.grid(row=r, column=c)
+            e.bind('<Return>', lambda event, y=r, x=c: change(event,y,x))
+            e.bind('<KP_Enter>', lambda event, y=r, x=c: change(event,y,x))
+    Top4.mainloop()
+
+
+
+    
+    
+def ReEnter():    
+ 
+    Top3=aa.Toplevel()
+    Top3.title("輸入資料")
+    Top3.geometry("480x310+650+300")
+
+    LTitle=aa.Label(Top3,width=15,font=('Arial Black', 20),text="應 收 帳 款 輸 入")
+    LTitle.place(x=85 ,y=10)
+    
+    
+    LName2=aa.Label(Top3,width=8,text="廠商資料 :")
+    LName2.place(x=5 ,y=70 )
+   
+    LName3=aa.Label(Top3,width=8,text="名稱 :")
+    LName3.place(x=5 ,y=100 )
+    LName3RAccount=aa.Entry(Top3,width=15,textvariable=VL_name)
+    LName3RAccount.place(x=70 ,y=100 )
+    
+    LName4=aa.Label(Top3,width=8,text="地址 :")
+    LName4.place(x=5 ,y=130 )
+    LName4RAccount=aa.Entry(Top3,width=15,textvariable=VL_adress)
+    LName4RAccount.place(x=70 ,y=130 )
+    
+    LName5=aa.Label(Top3,width=8,text="電話 :")
+    LName5.place(x=5 ,y=160 )
+    LName5RAccount=aa.Entry(Top3,width=15,textvariable=VL_phone)
+    LName5RAccount.place(x=70 ,y=160 )
+    
+    LName6=aa.Label(Top3,width=8,text="Email")
+    LName6.place(x=5 ,y=190 )
+    LName6RAccount=aa.Entry(Top3,width=15,textvariable=VL_email)
+    LName6RAccount.place(x=70 ,y=190 )
+    
+    LName8=aa.Label(Top3,width=8,text="產品資料 :")
+    LName8.place(x=190 ,y=70 )
+    
+    LName9=aa.Label(Top3,width=8,text="項目 :")
+    LName9.place(x=200 ,y=100 )
+    LName9RAccount=aa.Entry(Top3,width=15,textvariable=PL_name)
+    LName9RAccount.place(x=255 ,y=100 )
+    
+    LName10=aa.Label(Top3,width=8,text="單價 :")
+    LName10.place(x=200 ,y=130 )
+    LName10RAccount=aa.Entry(Top3,width=15,textvariable=PL_price)
+    LName10RAccount.place(x=255 ,y=130 )
+    
+    LName11=aa.Label(Top3,width=8,text="規格 :")
+    LName11.place(x=200 ,y=160 )
+    LName11RAccount=aa.Entry(Top3,width=15,textvariable=PL_dimension)
+    LName11RAccount.place(x=255 ,y=160 )
+    
+    LName12=aa.Label(Top3,width=8,text="訂單 :")
+    LName12.place(x=180 ,y=190 )
+    
+    
+    
+    LName=aa.Label(Top3,width=5,text="年:")
+    LName.place(x=210 ,y=220 )
+    LNameRAccount=aa.Entry(Top3,width=5,textvariable=OL_Ydate)
+    LNameRAccount.place(x=245 ,y=220 )
+    
+    LName0=aa.Label(Top3,width=5,text="月:")
+    LName0.place(x=280 ,y=220 )
+    LName0RAccount=aa.Entry(Top3,width=5,textvariable=OL_Mdate)
+    LName0RAccount.place(x=315 ,y=220 )
+    
+    LName1=aa.Label(Top3,width=5,text="日:")
+    LName1.place(x=350 ,y=220 )
+    LName1RAccount=aa.Entry(Top3,width=5,textvariable=OL_Ddate)
+    LName1RAccount.place(x=385 ,y=220 )
+    
+    
+    
+    LName13=aa.Label(Top3,width=8,text="數量 :")
+    LName13.place(x=200 ,y=250 )
+    LName13RAccount=aa.Entry(Top3,width=15,textvariable=OL_number)
+    LName13RAccount.place(x=255 ,y=250 )
+    
+    
+    
+    
+    
+    btnOK1=aa.Button(Top3,width=9,font=('Arial Black', 10),text="提交",command=enter)
+    btnOK1.place(x=75,y=230)
+    
+    
+    
+    Top3.mainloop()
+    
+
+def enter():
+    
+    conn= pymysql.connect('localhost','root',"123456",'try')  
+    cur=conn.cursor()
+    
+    V_name=VL_name.get()
+    V_adress=VL_adress.get()
+    V_phone=VL_phone.get()
+    V_email=VL_email.get()
+    
+    P_name=PL_name.get()
+    P_price=PL_price.get()
+    P_dimension=PL_dimension.get()
+   
+    OdateY = int(OL_Ydate.get())
+    OdateM = int(OL_Mdate.get())
+    OdateD = int(OL_Ddate.get())
+    
+    
+    O_number=int(OL_number.get())
+    
+    
+    sqlP="insert into product (P_name,P_price,P_dimension) Values (%s,%s,%s)"
+
+    sqlV="insert into vendor (V_name,V_adress,V_phone,V_email) Values (%s,%s,%s,%s)"
+    sqlO="insert into order_form (O_date,O_number) Values (%s,%s)"
+    
+    try:  
+
+        cur.execute(sqlP,(P_name,P_price,P_dimension))
+        
+        cur.execute(sqlV,(V_name,V_adress,V_phone,V_email))
+        cur.execute(sqlO,(datetime.date(OdateY,OdateM,OdateD),O_number))
+        
+        print('YYYYY')
+        conn.commit()
+        msgb.showinfo(title="成功創立",message="恭喜")
+    except Exception as yee:  
+        print (yee)  
+    
+    cur.close()
+    conn.close()
+    
+
+
+    
+LName1=tk.Label(root,width=15,text="會員帳號:")
+LName1.place(x=80 ,y=80 )
+LNameMAccount=tk.Entry(root,width=15,textvariable=MainAccount)
+LNameMAccount.place(x=170 ,y=80 )
+
+LName2=tk.Label(root,width=15,text="登入密碼:")
+LName2.place(x=80 ,y=110 )
+LNameMPASW=tk.Entry(root,width=15,textvariable=MainPasw,show="*")
+LNameMPASW.place(x=170 ,y=110 )
+
+btnMReg=tk.Button(root,width=6,font=('Arial Black', 10),text="註冊",command=Reg)
+btnMReg.place(x=220,y=160)
+
+btnMInside=tk.Button(root,width=6,font=('Arial Black', 10),text="登入",command=login)
+btnMInside.place(x=130,y=160)
+
+root.mainloop() 
+
+
+
+
+    
+
+
+    
+
+
+    
+
+
